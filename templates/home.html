@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    
+    .full-page-section {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed; /* Parallax effect */
+        color: white;
+        padding: 0 10%;
+        margin: 0;
+    }
+
+    .section-1 {
+        font-family: Georgia, serif;
+        background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                          url("{{ url_for('static', filename='bg1.jpg') }}");
+    }
+
+    .section-2 {
+        font-family: Georgia, serif;
+        background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                          url("{{ url_for('static', filename='bg2.jpg') }}");
+    }
+</style>
+
+<div class="full-page-section section-1">
+    <h3 class="text-warning fw-bold ">Welcome to Prakruthi-Payana</h3>
+    <h1 class="display-5 fw-bold mb-4">Are u ready to touch grass ?<br>like, Literally...</h1>
+    <p class="lead">We Manage the Trails, You Make the Memories.</p>
+    
+    <div class="position-absolute bottom-0 start-50 translate-middle-x mb-5">
+        <p class="text-uppercase small fw-bold" style="letter-spacing: 3px; opacity: 0.7;">
+            Scroll Down 
+        </p>
+    </div>
+</div>
+
+<div class="full-page-section section-2">
+    <h2 class="display-10 fw-bold mb-5 text-center">How to Use our website : </h2>
+    
+    <div class="row">
+        <div class="col-md-5">
+            <p class="h4 text-warning mb-3"><strong>For Trekkers:</strong></p>
+            <ul class="l list-unstyled">
+                <li class="mb-1">-> <strong>Register:</strong> Use the <em>Trekker Registration</em> to join us.</li>
+                <li class="mb-1">-> <strong>Browse:</strong> Explore upcoming trips and filter by location or difficulty.</li>
+                <li class="mb-1">-> <strong>Book:</strong> Log in to book ur slot & view booking status.</li>
+                <li>-> <strong>History:</strong> Manage ur dashboard, past treks, leave review and dump ur photos.</li>
+            </ul>
+        </div>
+
+        <div class="col-md-2"></div> <!-- Spacer -->
+
+        <div class="col-md-5">
+            <p class="h4 text-warning mb-3"><strong>For Trek leads:</strong></p>
+            <ul class=" list-unstyled">
+                <li class="mb-1">-> <strong>Apply:</strong> Register using the <em>Staff Registration</em> form with ur details & await admin approval.</li>
+                <li class="mb-1">-> <strong>Manage:</strong> Once approved, log in to view and coordinate your assigned treks.</li>
+                <li>-> <strong>Participants:</strong> Update preferences & view the trekker-list, reviews.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
