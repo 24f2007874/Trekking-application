@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    body { background-image: url("{{ url_for('static', filename='theme5.jpg') }}");}
+    .admin-sidebar {
+        width: 250px; position: fixed; top: 0; left: 0; height: 100vh;
+        background: rgba(10, 52, 22, 0.521); border-right: 3px solid rgba(240, 220, 36, 0.822);
+        padding-top: 100px; z-index: 100;
+        color: #ffc107;
+    }
+
+    .main-pane { margin-left: 260px; padding: 120px 4% 50px 4%;height: 100vh; }
+    .glass-table-container {
+        width: 150vh;
+        margin-left: -100px;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px; overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .search-section {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 40px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
+
+    .table { margin-bottom: 0; vertical-align: middle; color: white; }
+    .prop-label { font-family: 'B612 Mono'; font-size: 0.7rem; color: #ffc107; text-transform: uppercase; }
+</style>
+
+<div class="admin-sidebar">
+    <div class="px-4 mb-5">
+        <h5 class="fw-bold" style="font-family: 'Science Gothic';">ADMIN CONSOLE</h5>
+    </div>
+    <nav class="nav flex-column">
+        <a class="nav-link text-white-50 px-4 py-3" href="{{ url_for('admin_dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+        <a class="nav-link text-white-50 px-4 py-3" href="{{ url_for('manage_treks')}}"><i class="bi bi-mountain me-2"></i> Manage Treks</a>
+        <a class="nav-link text-white-50 px-4 py-3" href="{{ url_for('staff_manage')}}"><i class="bi bi-people me-2"></i> Staff Management</a>
+        <a class="nav-link text-warning active px-4 py-3" href="{{ url_for('user_registry')}}"><i class="bi bi-person-circle me-2"></i> User Registry</a>
+    </nav>
+</div>
+
+<div class="main-pane">
+    <h1 class="mb-5" style="color:white; 'Science Gothic'; font-weight: 800;">Results for: "{{ query }}"</h1>
+    <div class="search-section">
+        <h6 class="text-warning mb-4" style="font-family: 'B612 Mono';">TREK MATCHES ({{ treks|length }})</h6>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover">
+                <thead class="prop-label">
+                    <tr>
+                        <th>ID</th>
+                        <th>Trek Name</th>
+                        <th>Region</th>
+                        <th class="text-end">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in treks %}
+                    <tr class="border-bottom border-white border-opacity-10">
+                        <td style="font-family: 'B612 Mono'; opacity: 0.6;">{{ t.id }}</td>
+                        <td><a href="{{ url_for('view_trek', trek_id=t.id) }}" class="text-white fw-bold text-decoration-none">{{ t.trek_name }}</a></td>
+                        <td>{{ t.region }}</td>
+                        <td class="text-end"><span class="badge bg-secondary">{{ t.status }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center py-4 opacity-50">No treks found matching your query.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="search-section">
+        <h6 class="text-warning mb-4" style="font-family: 'B612 Mono';">STAFF MATCHES ({{ staff|length }})</h6>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover">
+                <thead class="prop-label">
+                    <tr>
+                        <th>Staff ID</th>
+                        <th>Name</th>
+                        <th>Expertise</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in staff %}
+                    <tr class="border-bottom border-white border-opacity-10">
+                        <td style="font-family: 'B612 Mono'; opacity: 0.6;">{{ s.user_id }}</td>
+                        <td class="fw-bold">{{ s.name }}</td>
+                        <td><span class="badge bg-black border border-secondary">{{ s.preferred_region }}</span></td>
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2">
+                                {% if s.approved != 'True' %}
+                                <form action="{{ url_for('approve_staff', staff_id=s.user_id) }}" method="POST">
+                                    <button type="submit" class="btn btn-success btn-sm px-3">Approve</button>
+                                </form>
+                                {% endif %}
+                                <form action="{{ url_for('blocklist_user', current_id=s.user_id) }}" method="POST">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Blacklist</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center py-4 opacity-50">No staff members found matching your query.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="search-section">
+        <h6 class="text-warning mb-4" style="font-family: 'B612 Mono';">USER MATCHES ({{ users|length }})</h6>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover">
+                <thead class="prop-label">
+                    <tr>
+                        <th>User ID</th>
+                        <th>Trekker Name</th>
+                        <th>Email</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr class="border-bottom border-white border-opacity-10">
+                        <td style="font-family: 'B612 Mono'; opacity: 0.6;">{{ u.user_id }}</td>
+                        <td class="fw-bold">{{ u.name }}</td>
+                        <td>{{ u.email }}</td>
+                        <td class="text-end">
+                            <!-- Admin Action: Blacklist Users [1, 2] -->
+                            <form action="{{ url_for('blocklist_user', target_id=u.id) }}" method="POST">
+                                <button type="submit" class="btn btn-outline-danger btn-sm px-4">
+                                    <i class="bi bi-shield-slash me-1"></i> Blacklist
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center py-4 opacity-50">No trekkers found matching your query.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
