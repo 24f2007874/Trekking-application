@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About page - Prakruthi-Payana</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<style>
+    body {
+        background:url("{{ url_for('static', filename='about.jpg') }}");
+        background-size: cover;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height:650px;
+        background-position: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .container {
+        margin-top: 100px;
+        margin-left: 50px;
+        margin-right: 50px;
+        background-color: rgba(255, 255, 255, 0.683);
+        padding-block: 10px;
+        padding-left: 20px;
+        font-style: italic;
+        font-size: large;
+        padding-right: 20px;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        text-align: center;
+        box-align: center;
+    }
+</style>
+<body>
+    <div class="container">
+        <p>
+            <header>
+                <h2>About This portal : </h2>
+            </header>
+            At <strong>Prakruthi-Payana</strong>, We’re a small crew of trail enthusiasts running short 2–3 day treks with guides 
+            who actually know the way.Think of us as your casual gateway to mountains—no stress, just fresh air, 
+            killer views, and stories that beat any Insta caption.If you’re down for mini adventures where the only deadlines are sunrise 
+            and your next snack break, Come vibe with us, hit the trails, and make memories that beat any scrolling session.
+        </p>
+        <a href="/">  Back to Home   </a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .parallax-viewport {
+        height: 100vh;
+        overflow-y: auto;
+        scroll-snap-type: y mandatory;
+        scrollbar-width: none;
+    }
+    .parallax-viewport::-webkit-scrollbar { display: none; }
+
+    .view-section {
+        height: 100vh; width: 100%;
+        position: relative;
+        scroll-snap-align: start;
+        background-attachment: fixed;
+        background-position: center;
+        background-size: cover;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .glass-box {
+        background: rgba(14, 67, 17, 0.525);
+        /*<!--backdrop-filter: blur(15px); -->*/
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 40px;
+        width:fit-content
+        margin: 0 8%;
+    }
+    .welcome-text { font-family: 'Science Gothic'; font-weight: 800; font-size: 4rem; color: white; }
+    .table-label { font-family: 'B612 Mono'; font-size: 0.75rem; color: #ffc107; text-transform: uppercase; }
+    .data-text { font-family: 'B612 Mono'; font-size: 0.9rem; color: white; }
+</style>
+
+<div class="parallax-viewport">
+    <div class="view-section" style="background-image: url('{{ url_for('static', filename='userbg1.jpg') }}');">    
+        <div class="d-flex justify-content-between align-items-center px-5 pt-5 mt-5">
+            <h1 class="welcome-text">Welcome, {{ trekker.name|upper }} </h1>
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-warning fw-bold px-4 py-2">EDIT UR PROFILE</a>
+        </div>
+        <div class="mt-auto mb-5">
+            <div class="glass-box">
+                <label class="table-label mb-4">Current Quest</label>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr class="table-label" style="border-bottom: 2px solid #ffc107;">
+                                <th>Trek</th>
+                                <th>Basecamp</th>
+                                <th>Start Date</th>
+                                <th>Status</th>
+                                <th>Lead </th>
+                                <th>Lead Mail</th>
+                            </tr>
+                        </thead>
+                        <tbody class="data-text">
+                            {% for b in active_bookings %}
+                            <tr style="cursor: pointer;" onclick="window.location='{{ url_for('view_trek', trek_id=b.trek_id) }}'">
+                                <td class="fw-bold">{{ b.trek_name }}</td>
+                                <td>{{ b.location }}</td>
+                                <td>{{ b.start_date.strftime('%d %b %Y') }}</td>
+                                <td><span class="badge bg-warning text-dark">{{ b.status }}</span></td>
+                                <td>{{ b.lead_name if b.lead_name else "TBA" }}</td>
+                                <td>{{ b.lead_mail if b.lead_mail else "TBA"}}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="opacity-50 text-center py-4">No upcoming booking..Browse treks above!</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="view-section" style="background-image: url('{{ url_for('static', filename='userbg2.jpg') }}');">
+        <div class="m-auto w-100">
+            <div class="glass-box" style="background: rgba(0,0,0,0.7);">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <label class="table-label">Ur Trekking History</label>
+                    <span class="small opacity-50 text-white">Summits: {{ history_bookings|length }}</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark border-secondary">
+                        <tbody class="data-text">
+                            {% for h in history_bookings %}
+                            <tr>
+                                <td class="py-4">
+                                    <h5 style="font-family: 'Science Gothic';">{{ h.trek_name }}</h5>
+                                    <span class="small opacity-50">{{ h.start_date.strftime('%b %Y') }}</span>
+                                    <div class="mt-1"><span class="text-warning small">Avg: {{ trek_ratings.get(h.trek_id, 'New') }} ★</span>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    {% if h.status == 'Completed' and not h.user_rating %}
+                                        <form action="{{ url_for('submit_rating', booking_id=h.booking_id) }}" method="POST" class="d-inline-flex gap-2">
+                                            <select name="rating" class="form-select-sm bg-black text-warning">
+                                                <option value="5">5 ★</option><option value="4">4 ★</option><option value="3">3 ★</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-outline-warning">Rate</button>
+                                        </form>
+                                    {% elif h.user_rating %}
+                                        <span class="badge border border-warning text-warning">{{ h.user_rating }} ★ Given</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Ongoing</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

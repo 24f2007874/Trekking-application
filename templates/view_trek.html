@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .parallax-viewport {
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scroll-snap-type: y mandatory; 
+    }
+
+    .view-section {
+        height: 100vh;
+        width: 100%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end; 
+        scroll-snap-align: start;
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .glass-dossier {
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(5px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 40px 8%;
+        color: white;
+    }
+    .trek-title { font-family: 'Science Gothic'; font-size: 2rem; font-weight: 800; }
+    .technical-stat { font-family: 'B612 Mono'; font-size: 0.75rem; color: #ffc107; text-transform: uppercase; }
+    .stat-value { font-family: 'B612 Mono'; font-size: 0.85rem; }
+    .floating-action-bar {
+        position: fixed;
+        bottom: 20px;
+        right: 60px;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid #ffc107;
+        padding: 15px 30px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+</style>
+
+<div class="parallax-viewport">
+    
+    <div class="view-section" style="background-image: url('{{ url_for('static', filename='trek_images/' + trek.image_file.replace('.jpg', '_1.jpg')) }}');">
+        <div class="glass-dossier">
+            <div class="d-flex align-items-baseline gap-3 mb-3">
+                <span class="trek-title">{{ trek.trek_name }}</span>
+                <span class="technical-stat" style="opacity: 0.8;">{{ trek.region }} • {{ trek.difficulty }}</span>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <label class="technical-stat d-block">Duration</label>
+                    <span class="stat-value">{{ trek.duration }} Days</span>
+                </div>
+                <div class="col-md-3">
+                    <label class="technical-stat d-block">Available Slots</label>
+                    <span class="stat-value text-warning fw-bold">{{ trek.available_slots }} / {{ trek.total_slots }}</span>
+                </div>
+                <div class="col-md-3">
+                    <label class="technical-stat d-block">Dates</label>
+                    <span class="stat-value">{{ trek.start_date.strftime('%d %b') }} - {{ trek.end_date.strftime('%d %b %Y') }}</span>
+                </div>
+                <div class="col-md-3">
+                    <label class="technical-stat d-block">Trek Lead</label>
+                    <span class="stat-value d-block">{{ assigned_staff.name if assigned_staff else 'TBA' }}</span>
+                    <span class="small opacity-50">{{ assigned_staff.email if assigned_staff else '' }}</span>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-left opacity-50 small" style="font-family: 'B612 Mono';">
+                <i class="bi bi-chevron-double-down"></i> SCROLL DOWN TO EXPLORE
+            </div>
+        </div>
+    </div>
+
+    <div class="view-section justify-content-start" style="background-image: url('{{ url_for('static', filename='trek_images/' + trek.image_file.replace('.jpg', '_2.jpg')) }}');">
+        <div class="glass-dossier h-100" style=" backdrop-filter: blur(0px);background: rgba(0, 0, 0, 0.098);">
+            <div class="row g-5">
+                <div class="col-md-7"><div class="p-4 h-100" style="background-color:rgba(7, 72, 19, 0.317);">
+                    <label class="technical-stat mb-3">Expedition Itinerary</label>
+                        <h6 class="text-white mb-1 " style="font-family: 'Science Gothic';font-size: large;" >{{ trek.description}} </h6>                    
+                </div></div>
+                <div class="col-md-5" style="background-color:rgba(7, 72, 19, 0.6);">
+                    <label class="technical-stat mb-3">Starting Location</label>
+                        <h6 class="text-white mb-1 " style="font-family: 'Science Gothic';font-size: large;" >Basecamp : {{ trek.location}} </h6>                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="floating-action-bar">
+    <div class="border-end border-secondary pe-4">
+        <span class="technical-stat d-block" style="font-size: 0.6rem;">Operational Status</span>
+        <span class="fw-bold text-white">{{ trek.status }}</span>
+    </div>
+    
+    <div>
+        {% if not current_user.is_authenticated %}<a href="{{ url_for('login') }}" class="btn btn-warning btn-sm px-4 fw-bold">Login to Book</a>
+        {% elif current_user.role == 'user' %}
+            {% set is_booked = current_user.bookings | selectattr("trek_id", "equalto", trek.id) | list %}
+            {% if is_booked %}
+                <button class="btn btn-primary btn-sm px-4 fw-bold" disabled>ALREADY BOOKED</button>
+            {% elif trek.status == 'Open' and trek.available_slots > 0 %}
+                <form action="{{ url_for('book_trek', trek_id=trek.id) }}" method="POST" class="m-0">
+                    <button type="submit" class="btn btn-warning btn-sm px-4 fw-bold">CONFIRM BOOKING</button>
+                </form>
+            {% else %}
+                <button class="btn btn-secondary btn-sm px-4" disabled>BOOKING CLOSED / FULL</button>
+            {% endif %}
+        {% elif current_user.role == 'staff' and trek.assigned_staff_id == current_user.user_id %}
+            <a href="{{ url_for('view_participants', trek_id=trek.id) }}" class="btn btn-info btn-sm px-4 fw-bold">view participants</a>
+        {% elif current_user.role == 'admin' %}
+        <div class="btn-group">
+            <a href="{{ url_for('edit_trek', trek_id=trek.id) }}" class="btn btn-outline-light btn-sm px-4">EDIT</a>
+            <a href="{{ url_for('view_participants', trek_id=trek.id) }}" class="btn btn-info btn-sm px-4 fw-bold">view participants</a>
+            <a href="{{ url_for('delete_trek', trek_id=trek.id) }}" class="btn btn-outline-danger btn-sm px-4">DELETE</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    body { 
+        background-image: url("{{ url_for('static', filename='theme3.jpg') }}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        margin: 0;
+        min-height: 100vh;
+    }
+    .trek-card {
+        background: rgba(20, 30, 20, 0.85);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    .trek-card:hover { 
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5) !important;
+    }
+    .trek-card-img {
+        position: relative;
+        height: 200px;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .trek-card-img::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 40%);
+    }
+
+    .trek-card h2 { 
+        font-family: 'Science Gothic', sans-serif;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+</style>
+<!--  cards aligned & working , do not change pixels!!-->
+<div class="container py-5 mt-5">
+    <div class="p-4 rounded-4 mb-5" style="background: rgba(2, 88, 3, 0.9); backdrop-filter: blur(5px); box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+        <form method="GET" action="{{ url_for('browse_treks') }}" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="small text-warning text-uppercase fw-bold mb-2 d-block" style="font-family: 'B612 Mono';">Region</label>
+                <select name="region" class="form-select bg-dark text-white border-secondary">
+                    <option value="">All Regions</option>
+                    <option value="Western Ghats" {% if request.args.get('region') == 'Western Ghats' %}selected{% endif %}>Western Ghats</option>
+                    <option value="Himachal" {% if request.args.get('region') == 'Himachal' %}selected{% endif %}>Himachal</option>
+                    <option value="Uttarakhand" {% if request.args.get('region') == 'Uttarakhand' %}selected{% endif %}>Uttarakhand</option>
+                    <option value="Kerala" {% if request.args.get('region') == 'Kerala' %}selected{% endif %}>Kerala</option>
+                    <option value="Nepal" {% if request.args.get('region') == 'Nepal' %}selected{% endif %}>Nepal</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="small text-warning text-uppercase fw-bold mb-2 d-block" style="font-family: 'B612 Mono';">Difficulty</label>
+                <select name="difficulty" class="form-select bg-dark text-white border-secondary">
+                    <option value="">Any Difficulty</option>
+                    <option value="Easy" {% if request.args.get('difficulty') == 'Easy' %}selected{% endif %}>Easy</option>
+                    <option value="Moderate" {% if request.args.get('difficulty') == 'Moderate' %}selected{% endif %}>Moderate</option>
+                    <option value="Hard" {% if request.args.get('difficulty') == 'Hard' %}selected{% endif %}>Hard</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-warning w-100 fw-bold py-2">Apply Filters</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        {% for trek in treks %}
+        <div class="col-lg-4 col-md-6">
+            <div class="trek-card rounded-4 overflow-hidden shadow-lg position-relative h-100">
+                
+                <div class="trek-card-img" style="background-image: url('{{ url_for('static', filename='trek_images/' + trek.image_file.replace('.jpg', '_1.jpg')) }}');">
+                    <span class="badge bg-black bg-opacity-75 text-warning px-3 py-2 border border-warning border-opacity-25 position-absolute top-0 start-0 m-3" style="z-index: 10; font-family: 'B612 Mono'; font-size: 0.75rem;">
+                        {{   trek.region }}
+                    </span>
+                </div>
+
+                <div class="card-info p-4 flex-grow-1 d-flex flex-column justify-content-between">
+                    <div>
+                        <h2 class="h4 text-white mb-1">
+                            <a href="{{ url_for('view_trek', trek_id=trek.id) }}" class="text-white text-decoration-none stretched-link">
+                                {{ trek.trek_name|upper }}
+                            </a>
+                        </h2>
+                        <p class="large text-white mb-3"><i class="bi bi-geo-alt-fill text-warning me-1"></i>{{ trek.location |upper }}</p>
+
+                        <div class="d-flex justify-content-between small opacity-75 mb-4 border-top border-white border-opacity-10 pt-3" style=" color:gold;font-weight: bolder 10px; 'B612 Mono';">
+                            <span>
+                                <i class="bi bi-circle-fill me-1 {% if trek.difficulty == 'Hard' %}text-danger{% elif trek.difficulty == 'Easy' %}text-success{% else %} text-white mb-3{% endif %}"></i> 
+                                {{ trek.difficulty }}
+                            </span>
+                            <span>{{ trek.available_slots }} Slots Left</span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid position-relative" style="z-index: 20;">
+                        {% if not current_user.is_authenticated %}
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-warning btn-sm py-2 fw-bold">Login to Book</a>
+                        {% elif current_user.role == 'user' %}
+                            {% set is_booked = current_user.bookings | selectattr("trek_id", "equalto", trek.id) | list %}
+                            {% if is_booked %}
+                                <button class="btn btn-secondary btn-sm fw-bold py-2" disabled><i class="bi bi-patch-check-fill me-1"></i> BOOKED</button>
+                            {% else %}
+                                <a href="{{ url_for('view_trek', trek_id=trek.id) }}" class="btn btn-warning btn-sm text-dark fw-bold py-2">BOOK SLOT</a>
+                            {% endif %}
+                        {% elif current_user.role == 'staff' and trek.assigned_staff_id == current_user.user_id %}
+                            <a href="{{ url_for('view_trek', trek_id=trek.id) }}" class="btn btn-info btn-sm text-dark fw-bold py-2">MANAGE TREK</a>
+                        {% elif current_user.role == 'admin' %}
+                            <a href="{{ url_for('view_trek', trek_id=trek.id) }}" class="btn btn-light btn-sm fw-bold py-2">EDIT DETAILS</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="p-5 rounded-4" style="background: rgba(20, 30, 20, 0.8); border: 2px dashed rgba(255,193,7,0.3); backdrop-filter: blur(5px);">
+                <h3 class="text-warning fw-bold mb-2">NO ACTIVE TRAILS FOUND</h3>
+                <p class="text-white-50 mb-0">The range is quiet. Try altering or clearing your filters.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    body { background-image: url("{{ url_for('static', filename='theme5.jpg') }}");}
+    .admin-sidebar {
+        width: 250px; position: fixed; top: 0; left: 0; height: 100vh;
+        background: rgba(10, 52, 22, 0.521); border-right: 3px solid rgba(240, 220, 36, 0.822);
+        padding-top: 100px; z-index: 100;
+        color: #ffc107;
+    }
+    .main-pane { margin-left: 260px; padding: 120px 4% 50px 4%; height: 100vh;}
+        h1 { font-family: 'Science Gothic'; font-weight: 800; font-size: 3rem; letter-spacing: -1px; }
+    .prop-label { font-family: 'B612 Mono'; font-size: 0.7rem; color: #ffc107; text-transform: uppercase; letter-spacing: 1px; }
+    .mono-data { font-family: 'B612 Mono'; font-size: 0.9rem; }
+    .glass-table-container {
+        width: 170vh;
+        margin-left: -100px;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px; overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .table { margin-bottom: 0; vertical-align: middle; }
+    .trek-link { color: #ffffff; text-decoration: none; font-weight: 700; font-size: 1.1rem; }
+    .trek-link:hover { color: #ffc107; }
+</style>
+
+<div class="admin-sidebar">
+    <div class="px-5 mb-5"><h5 style="font-family: 'Science Gothic';">TREK CONTROL & view bookings </h5></div>
+    <nav class="nav flex-column">
+        <a class="nav-link text-white-50 px-4 py-3" href="{{ url_for('admin_dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+        <a class="nav-link text-warning active px-4 py-3" href="{{ url_for('manage_treks')}}"><i class="bi bi-mountain me-2"></i> Manage Treks & participants</a>
+        <a class="nav-link text-white-50 px-4 py-3" href="{{ url_for('staff_manage')}}"><i class="bi bi-people me-2"></i> Staff Management</a>
+        <a class="nav-link text-white-50 px-4 py-3" href="{{ url_for('user_registry')}}"><i class="bi bi-person-circle me-2"></i> User Registry</a>
+    </nav>
+</div>
+
+<div class="main-pane">
+    <div class="glass-table-container">
+        <table class="table table-dark table-hover">
+            <thead style="background: rgba(255,255,255,0.03);">
+                <tr class="prop-label">
+                    <th class="ps-2 py-3">ID</th>
+                    <th>Trek Route</th>
+                    <th>Geography</th>
+                    <th>Logistics</th>
+                    <th>Inventory</th>
+                    <th>Timeline</th>
+                    <th>Lead Staff</th>
+                    <th>Status</th>
+                    <th class="text-end pe-4">View bookings </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in treks %}
+                <tr class="border-bottom border-white border-opacity-10">
+                    <td class="ps-4 mono-data opacity-50">{{ t.id }}</td>
+
+                    <td>
+                        <a href="{{ url_for('view_trek', trek_id=t.id) }}" class="trek-link">{{ t.trek_name }}</a>
+                        {% if t.status in ['Closed', 'Completed'] %}
+                            <div class="mt-1">
+                                <span class="text-warning" style="font-family: 'B612 Mono'; font-size: 0.75rem;">★ {{ trek_ratings.get(t.id, 'New') }}</span>
+                            </div>
+                        {% else %}
+                            <span class="badge bg-dark text-info border border-info mt-1" style="font-size: 0.6rem;">ACTIVE</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="fw-bold">{{ t.region }}</div>
+                        <div class="small text-white-50">{{ t.location }}</div>
+                    </td>
+
+                    <td>
+                        <span class="badge bg-black border border-secondary text-warning mb-1">{{ t.difficulty }}</span>
+                        <div class="small mono-data">{{ t.duration }} Days</div>
+                    </td>
+
+                    <td class="mono-data">
+                        <span class="{% if t.available_slots < 5 %}text-danger{% else %}text-success{% endif %}">
+                            {{ t.available_slots }}
+                        </span> / {{ t.total_slots }}
+                    </td>
+
+                    <td class="small mono-data">
+                        <div>{{ t.start_date.strftime('%d %b %Y') }}</div>
+                        <div class="opacity-50">to {{ t.end_date.strftime('%d %b %Y') }}</div>
+                    </td>
+
+                    <td>
+                        <div class="small opacity-50 prop-label" style="font-size: 0.5rem;">Assigned</div>
+                        <div class="fw-bold">{{ t.assigned_staff_id }}</div> 
+                    </td>
+
+                    <td>
+                        <span class="small fw-bold text-uppercase" 
+                              style="color: {% if t.status == 'Open' %}#28a745{% elif t.status == 'Closed' %}#dc3545{% else %}#ffc107{% endif %};">
+                            ● {{ t.status }}
+                        </span>
+                    </td>
+
+                    <td class="text-end pe-4">
+                        <div class="d-flex flex-column align-items-end gap-2">
+                            <a href="{{ url_for('edit_trek', trek_id=t.id) }}" class="btn btn-outline-light btn-sm px-3" style="border-radius: 6px;">Edit</a>
+                            <a href="{{ url_for('view_participants', trek_id=t.id) }}" class="btn btn-info btn-sm px-4 fw-bold">view participants</a>
+                            <form action="{{ url_for('delete_trek', trek_id=t.id) }}" method="POST" onsubmit="return confirm('Confirm removal?');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm px-3" style="border-radius: 6px;">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center py-5 opacity-25">No active trek routes found in the database.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

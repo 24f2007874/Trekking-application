@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Participants list of  - {{ trek.trek_name }}</title>
+    <style>
+        body { background-image:url("{{ url_for('static', filename='login.jpg') }}"); sans-serif; padding: 40px; color: #f4f4f4;font-weight: bolder; }
+        .sheet { background: rgba(19, 71, 30, 0.411); padding: 20px; border: 1px solid #ccc; max-width: 800px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #fffefe; padding: 12px; text-align: left; }
+        th { background-color: #11511575; }
+    </style>
+</head>
+<body>
+    <div class="sheet">
+        <h2>Participants list of  - {{ trek.trek_name | upper}}</h2>
+        <p>Location: {{ trek.location , trek.region }} | Total Participants: {{ participants|length }}</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Trekker ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in participants %}
+                <tr>
+                    <td>{{ p.user_id }}</td>
+                    <td>{{ p.trekker.name | upper}}</td>
+                    <td>{{ p.trekker.email | upper }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

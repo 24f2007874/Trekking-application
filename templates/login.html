@@ -1,0 +1,38 @@
+<style>
+    body {
+        background-image:url("{{ url_for('static', filename='login.jpg') }}");
+        background-size: cover;
+        background-position: center;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .lbox {
+        width: 400px;
+        text-align: center;
+        height: 300px;
+        box-align: center;
+        margin-bottom: 05px;
+        margin-left: 300px;
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        background: rgba(255, 255, 255, 0.785);   
+    }
+</style>
+{% extends "base.html" %}
+{% block content %}
+<div class="lbox ">
+    <h2 style="font-size: 2em; font-weight: bold;">Login</h2>
+    <form method="POST" action="{{ url_for('login') }}">
+        <div>
+            <label for="user_id">User ID :</label><br>
+            <input type="text" name="user_id" placeholder="Enter your ID..." required>
+        </div>
+        <div>
+            <label for="password">Password :</label><br>
+            <input type="password" name="password" placeholder="Password..." required>
+        </div>
+        <button type="submit" class="btn-login">Login</button>
+    </form>
+</div>
+{% endblock %}
